@@ -13,7 +13,7 @@
 
 #define BUTTON     8
 
-lightIsOn = 0;
+int lightIsOn = 0;
 
 /*
  * setup:
