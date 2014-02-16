@@ -23,8 +23,6 @@ lightIsOn = 0;
 
 void setup (void)
 {
-  int i ;
-
   if (geteuid () != 0)
   {
     fprintf (stderr, "Need to be root to run (sudo?)\n") ;
