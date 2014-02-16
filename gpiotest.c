@@ -66,16 +66,17 @@ void waitButton (void)
 void toggleLight (void)
 {
   printf("Toggling the light") ; fflush(stdout) ;
-  if (lightIsOn)
-  {
-    digitalWrite(GREEN, 0);
-    lightIsOn = 0;
-  }
-  else
-  {
-    digitalWrite(GREEN, 1);
-    lightIsOn = 1;
-  }
+  digitalWrite(GREEN, 1);
+  // if (lightIsOn)
+  // {
+  //   digitalWrite(GREEN, 0);
+  //   lightIsOn = 0;
+  // }
+  // else
+  // {
+  //   digitalWrite(GREEN, 1);
+  //   lightIsOn = 1;
+  // }
 }
 
 
@@ -94,6 +95,5 @@ int main (void)
   {
     waitButton   () ;
     toggleLight  () ;
-    delay(1000);
   }
 }
