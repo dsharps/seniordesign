@@ -94,5 +94,6 @@ int main (void)
   {
     waitButton   () ;
     toggleLight  () ;
+    delay(1000);
   }
 }
