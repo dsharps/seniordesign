@@ -11,21 +11,22 @@ def writeNumber(value):
     # bus.write_byte_data(address, 0, value)
     return -1
 
-def readNumber():
-    number = bus.read_byte(address)
-    # number = bus.read_byte_data(address, 1)
-    return number
+def readX():
+    x_pos = bus.read_byte(address)
+    return x_pos
+
+def readY():
+    y_pos = bus.read_byte(address)
+    return y_pos
 
 while True:
-    var = input("Enter 1 - 9: ")
-    if not var:
-        continue
+    print "Reading from Arduino"
 
-    writeNumber(var)
-    print "RPI: Hi Arduino, I sent you ", var
+    x_pos = readX();
+    y_pos = readY();
+
+    print "X: %s, Y: %s" % (x_pos, y_pos)
     # sleep one second
     time.sleep(1)
 
-    number = readNumber()
-    print "Arduino: Hey RPI, I received a digit ", number
-    print
+    print "----------------"
