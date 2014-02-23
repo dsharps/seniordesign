@@ -22,10 +22,12 @@ def readY():
 while True:
     print "Reading from Arduino"
 
-    x_pos = readX();
-    y_pos = readY();
+    x_low = bus.read_byte(address)
+    x_high = bus.read_byte(address)
+    y_low = bus.read_byte(address)
+    y_high = bus.read_byte(address)
 
-    print "X: %s, Y: %s" % (x_pos, y_pos)
+    print "X: %s, Y: %s" % (x_low + (x_high << 8), y_low + (y_high << 8))
     # sleep one second
     time.sleep(1)
 
