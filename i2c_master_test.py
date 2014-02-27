@@ -29,6 +29,6 @@ while True:
 
     print "X: %s, Y: %s" % (x_low + (x_high << 8), y_low + (y_high << 8))
     # sleep one second
-    time.sleep(1)
+    time.sleep(0.001)
 
     print "----------------"
