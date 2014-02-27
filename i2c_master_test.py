@@ -26,6 +26,8 @@ while True:
     x_high = bus.read_byte(address)
     y_low = bus.read_byte(address)
     y_high = bus.read_byte(address)
+    
+    print "x_low: %s, x_high: %s, y_low: %s, y_high: %s" % (x_low, x_high, y_low, y_high)
 
     print "X: %s, Y: %s" % (x_low + (x_high << 8), y_low + (y_high << 8))
     # sleep one second
