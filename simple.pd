@@ -1,0 +1,6 @@
+#N canvas 762 215 832 667 10;
+#X obj 188 191 dac~;
+#X obj 191 102 osc~ 300;
+#X floatatom 192 56 5 0 0 0 Osc_Frequency - -;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
