@@ -20,17 +20,17 @@ def readY():
     return y_pos
 
 while True:
-    print "Reading from Arduino"
+    #print "Reading from Arduino"
 
     x_low = bus.read_byte(address)
     x_high = bus.read_byte(address)
     y_low = bus.read_byte(address)
     y_high = bus.read_byte(address)
     
-    print "x_low: %s, x_high: %s, y_low: %s, y_high: %s" % (x_low, x_high, y_low, y_high)
+    #print "x_low: %s, x_high: %s, y_low: %s, y_high: %s" % (x_low, x_high, y_low, y_high)
 
     print "X: %s, Y: %s" % (x_low + (x_high << 8), y_low + (y_high << 8))
     # sleep one second
     time.sleep(0.001)
 
-    print "----------------"
+    #print "----------------"
