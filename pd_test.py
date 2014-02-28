@@ -1,6 +1,8 @@
 import smbus
 import time
 import libpd as pd
+import os
+
 # for RPI version 1, use "bus = smbus.SMBus(0)"
 bus = smbus.SMBus(1)
 
@@ -21,6 +23,23 @@ def readY():
     return y_pos
 
 
+def send_to_pd(message=''):
+    os.system("echo '" + message + "' ~ pdsend 3000")
+
+def audio_on():
+    message = '0 1;' #id 0 is dsp, 1 = turn on
+    send_to_pd(message)
+
+def audio_off():
+    message = '0 0;' #id o is dsp, 0 = turn off
+    send_to_pd(message)
+
+def set_frequency(frequency):
+    message = 'freq1 ' + frequency;
+    send_to_pd(message)
+
+
+audio_on()
 
 while True:
     #print "Reading from Arduino"
@@ -34,6 +53,7 @@ while True:
 
     print "X: %s, Y: %s" % (x_low + (x_high << 8), y_low + (y_high << 8))
     # sleep one second
-    time.sleep(0.001)
+    set_frequency( x_low + (x_high << 8))
+    time.sleep(1)
 
     #print "----------------"
