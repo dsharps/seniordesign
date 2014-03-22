@@ -3,6 +3,7 @@ import time
 #import libpd as pd
 import os
 import OSC
+import math
 
 # for RPI version 1, use "bus = smbus.SMBus(0)"
 bus = smbus.SMBus(1)
@@ -12,10 +13,10 @@ address = 0x04
 
 # Init OSC
 client = OSC.OSCClient()
-client.connect(('127.0.0.1', 9001)) # first argument is the IP of the host, second argument is the port to use
+client.connect(('127.0.0.1', 9002)) # first argument is the IP of the host, second argument is the port to use
 
 try:
-    client.send(OSC.OSCMessage("0", 1)) # first argument is what we could call the OSC adress of the data, second argument is the actual data to be sent.
+    client.send(OSC.OSCMessage("/address", 1)) # first argument is what we could call the OSC adress of the data, second argument is the actual data to be sent.
 except:
     print "not connected"
     pass
@@ -35,7 +36,8 @@ def readY():
 
 
 def send_to_pd(message=''):
-    os.system("echo '" + message + "'| pdsend 3000")
+    #os.system("echo '" + message + "'| pdsend 3000")
+    pass
 
 def audio_on():
     message = '0 1;' #id 0 is dsp, 1 = turn on
@@ -49,6 +51,12 @@ def set_frequency(frequency):
     message = '1 ' + repr(frequency) + ';'
     send_to_pd(message)
 
+def distance_with_deadzone(x, y):
+    d = math.sqrt((x-512)**2 + (y-512)**2)
+    if d > 65:
+        return d
+    else:
+        return 0
 
 audio_on()
 xpos = 0
@@ -65,7 +73,7 @@ while True:
     xpos = (x_low + (x_high << 8))
     ypos = (y_low + (y_high << 8))
     
-    #print "x_low: %s, x_high: %s, y_low: %s, y_high: %s" % (x_low, x_high, y_low, y_high)
+    #print "x_low: %s, x_high: %s, y_low: %s, y_high: %s, | %s, %s" % (x_low, x_high, y_low, y_high, xpos, ypos)
 
     #print "X: %s, Y: %s" % (xpos, ypos)
     # sleep one second
@@ -74,7 +82,10 @@ while True:
     else:
         audio_off()
 
-    set_frequency(ypos)
+    client.send(OSC.OSCMessage("/frequency", ypos))
+    client.send(OSC.OSCMessage("/volume", distance_with_deadzone(xpos, ypos)))
+    client.send(OSC.OSCMessage("/timbre", xpos))
+    #set_frequency(ypos)
     time.sleep(0.001)
 
     #print "----------------"

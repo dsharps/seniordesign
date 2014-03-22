@@ -24,7 +24,7 @@ def readY():
 
 
 def send_to_pd(message=''):
-    os.system("echo '" + message + "'| pdsend 3000")
+    os.system("echo '" + message + "'| pdsend 3004")
 
 def audio_on():
     message = '0 1;' #id 0 is dsp, 1 = turn on
@@ -38,7 +38,7 @@ def set_frequency(frequency):
     message = '1 ' + repr(frequency) + ';'
     send_to_pd(message)
 
-
+print "Activating audio"
 audio_on()
 xpos = 0
 ypos = 0
