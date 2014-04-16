@@ -57,15 +57,16 @@ def spithread():
             #xpos = resp[0]
             #ypos = resp[1]
 
-            resp = spi.xfer2([num]);
-            if (resp[0] != num-1):
-                print "%s : %s" % (num, resp)
+            resp = spi.xfer([0, 1]);
+            print resp
+            #if (resp[0] != num-1):
+            #    print "%s : %s" % (num, resp)
             
             #print resp
-            num+=1
-            if num > 127:
-                print "---------"
-                num = 0
+            #num+=1
+            #if num > 127:
+            #    print "---------"
+            #    num = 0
             
             #client.send(OSC.OSCMessage("/hip1", get_hip(ypos)))
             #client.send(OSC.OSCMessage("/lop1", get_lop(ypos)))
@@ -75,7 +76,7 @@ def spithread():
                                                              #get_lop(ypos), \
                                                              #distance_with_deadzone(xpos, ypos), \
                                                              #get_pwm(xpos))
-            time.sleep(0.1)
+            time.sleep(0.05)
         except:
             time.sleep(0.001)
         if exit:
