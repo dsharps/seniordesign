@@ -42,12 +42,32 @@ def get_pwm(x):
 
 def spithread():
     print "Starting SPI Thread"
+    num = 0;
+    #print spi.xfer2([0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
+    #print spi.xfer2([0xAA, 0xAA])
+    #print spi.readbytes(2)
+    #print spi.readbytes(2)
+    #print spi.readbytes(6)
+    #print spi.xfer2([0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08])
+    print spi.xfer2([0x00]);
     while True:
         try:
-            resp = spi.xfer2([1, 2, 3, 4])
-            xpos = (resp[0] << 8) + resp[1]
-            ypos = (resp[2] << 8) + resp[3]
-            print "XPos: %s, YPos: %s\n" % (xpos, ypos)
+            #resp = spi.xfer2([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08])
+            #resp = spi.readbytes(6)
+            #xpos = resp[0]
+            #ypos = resp[1]
+
+            resp = spi.xfer([0, 1]);
+            print resp
+            #if (resp[0] != num-1):
+            #    print "%s : %s" % (num, resp)
+            
+            #print resp
+            #num+=1
+            #if num > 127:
+            #    print "---------"
+            #    num = 0
+            
             #client.send(OSC.OSCMessage("/hip1", get_hip(ypos)))
             #client.send(OSC.OSCMessage("/lop1", get_lop(ypos)))
             #client.send(OSC.OSCMessage("/volume1", distance_with_deadzone(xpos, ypos)))
@@ -56,10 +76,11 @@ def spithread():
                                                              #get_lop(ypos), \
                                                              #distance_with_deadzone(xpos, ypos), \
                                                              #get_pwm(xpos))
-            time.sleep(0.001)
+            time.sleep(0.05)
         except:
             time.sleep(0.001)
         if exit:
+            spi.close()
             thread.exit()
 
 try:
