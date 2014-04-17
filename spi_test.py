@@ -4,6 +4,7 @@ import time
 import os
 import OSC
 import math
+import sys
 
 spi = spidev.SpiDev()
 spi.open(0, 0)
@@ -18,47 +19,70 @@ except:
     print "not connected"
     pass
 
-deadzone = 55
+deadzone = 10
 
 def distance_with_deadzone(x, y):
-    d = math.sqrt((x-1023)**2 + (y-1023)**2)
+    d = math.sqrt((x-128)**2 + (y-128)**2)
     if d > (deadzone * 2):
         return d
     else:
         return 0
 
 def get_hip(y):
-    if (y > 1023 + deadzone):
-        return ((y - 1023) / (1023.0 + deadzone) * 4000)
+    if (y > 128 + deadzone):
+        return ((y - 128) / 128.0) * 4000
     return 0
 
 def get_lop(y):
-    if (y < 1023 - deadzone):
-        return (y / (1023.0 - deadzone) * 4000)
+    if (y < 128 - deadzone):
+        return (y / 128.0) * 4000
     return 4000
 
 def get_pwm(x):
-    return (x/2048.0)*100
+    return (x/255.0)*100
+
+def get_32_channels():
+    resp = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120,
+            1, 9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 105, 113, 121, 0]
+    results = [0] * 33
+    for i in xrange(0, 33):
+        try:
+            results[i] = spi.xfer2([resp[i]])
+        except:
+            print sys.exc_info()
+    return [val for sublist in results[1:] for val in sublist]
+    
 
 def spithread():
     print "Starting SPI Thread"
     while True:
         try:
-            resp = spi.xfer2([1, 2, 3, 4])
-            xpos = (resp[0] << 8) + resp[1]
-            ypos = (resp[2] << 8) + resp[3]
-            print "XPos: %s, YPos: %s\n" % (xpos, ypos)
-            #client.send(OSC.OSCMessage("/hip1", get_hip(ypos)))
-            #client.send(OSC.OSCMessage("/lop1", get_lop(ypos)))
-            #client.send(OSC.OSCMessage("/volume1", distance_with_deadzone(xpos, ypos)))
-            #client.send(OSC.OSCMessage("/pwm1", get_pwm(xpos)))
-            #print "hip: %s, lop: %s, volume: %s, pwm: %s" % (get_hip(ypos), \
-                                                             #get_lop(ypos), \
-                                                             #distance_with_deadzone(xpos, ypos), \
-                                                             #get_pwm(xpos))
-            time.sleep(0.001)
+            channel_data = get_32_channels()
+            #print channel_data
+            client.send(OSC.OSCMessage("/hip1", get_hip(channel_data[0])))
+            client.send(OSC.OSCMessage("/lop1", get_lop(channel_data[0])))
+            client.send(OSC.OSCMessage("/volume1", distance_with_deadzone(channel_data[0], channel_data[1])))
+            client.send(OSC.OSCMessage("/pwm1", get_pwm(channel_data[1])))
+            
+            '''client.send(OSC.OSCMessage("/hip2", get_hip(channel_data[2])))
+            client.send(OSC.OSCMessage("/lop2", get_lop(channel_data[2])))
+            client.send(OSC.OSCMessage("/volume2", distance_with_deadzone(channel_data[2], channel_data[3])))
+            client.send(OSC.OSCMessage("/pwm2", get_pwm(channel_data[3])))
+
+            client.send(OSC.OSCMessage("/hip3", get_hip(channel_data[4])))
+            client.send(OSC.OSCMessage("/lop3", get_lop(channel_data[4])))
+            client.send(OSC.OSCMessage("/volume3", distance_with_deadzone(channel_data[4], channel_data[5])))
+            client.send(OSC.OSCMessage("/pwm3", get_pwm(channel_data[5])))
+
+            client.send(OSC.OSCMessage("/hip4", get_hip(channel_data[6])))
+            client.send(OSC.OSCMessage("/lop4", get_lop(channel_data[6])))
+            client.send(OSC.OSCMessage("/volume4", distance_with_deadzone(channel_data[6], channel_data[7])))
+            client.send(OSC.OSCMessage("/pwm4", get_pwm(channel_data[7])))'''
+            
+            time.sleep(0.01)
         except:
-            time.sleep(0.001)
+            print "Error"
+            time.sleep(0.1)
         if exit:
             thread.exit()
 

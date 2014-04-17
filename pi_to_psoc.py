@@ -12,6 +12,8 @@ bus = smbus.SMBus(1)
 
 address = 0x08
 exit = 0
+#count = 0
+#current_time = time.time()
 
 def spithread():
     while 1:
@@ -20,7 +22,7 @@ def spithread():
                                                  11,12,13,14,15,16,17,18,19,20,
                                                  21,22,23,24,25,26,27,28,29,30,
                                                  31,32,33,34,35,36,37,38,39,40,
-                                                 41,42,43,44,45,46,47,48,49,50]))
+                                                 41,42,43,44,45,46,47,48,49,50]))   
             time.sleep(0.005)
         except:
             time.sleep(0.005)
@@ -56,4 +58,5 @@ except:
 
 exit = raw_input("Press Enter to exit\n")
 exit = 1
+#print "Count: %s, Time: %s, Rate: %s" % (count, time.time()-current_time, (count / (time.time() - current_time)))
 time.sleep(1)
