@@ -54,6 +54,7 @@ def get_32_channels():
 
 #if the x,y position is outside of the deadzone, return true
 def note_active(x, y): 
+    #return False
     return (math.sqrt((x-128)**2 + (y-128)**2) > (deadzone * 2))
 
 #four-note polyphony
@@ -65,6 +66,11 @@ def spithread():
         try:
             channel_data = get_32_channels()
             #hardcoded for 2 channels of polyphony, for now
+            #print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
+            #if note_active(channel_data[0], channel_data[1]):
+            #    print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
+    
+            #check note 1
             if note_active(channel_data[0], channel_data[1]):
                 if pitches[0] == 0:
                     #turn on note
@@ -80,28 +86,32 @@ def spithread():
                     print "Deactivating Note 60"
                     pitches[0] = 0
                     client.send(OSC.OSCMessage("/p1", 0))
-            
+                    client.send(OSC.OSCMessage("/vol1", 0))
+
+            #check note 2
+            if note_active(channel_data[2], channel_data[3]):
+                if pitches[1] == 0:
+                    #turn on note
+                    print "Activating Note 67"
+                    pitches[1] = 67
+                    client.send(OSC.OSCMessage("/p2", 67))
+                client.send(OSC.OSCMessage("/tune2", ((channel_data[2]/255.0)*50)))
+                client.send(OSC.OSCMessage("/lop2", ((channel_data[3]/255.0)*127)))
+                client.send(OSC.OSCMessage("/vol2", distance_with_deadzone(channel_data[2], channel_data[3])))
+            else:
+                if pitches[1] != 0:
+                    #turn off note
+                    print "Deactivating Note 67"
+                    pitches[1] = 0
+                    client.send(OSC.OSCMessage("/p2", 0))
+                    client.send(OSC.OSCMessage("/vol2", 0))
+                        
             '''client.send(OSC.OSCMessage("/p1", get_hip(60)))
             client.send(OSC.OSCMessage("/lop1", get_lop(channel_data[0])))
             client.send(OSC.OSCMessage("/volume1", distance_with_deadzone(channel_data[0], channel_data[1])))
             client.send(OSC.OSCMessage("/pwm1", get_pwm(channel_data[1])))'''
             
-            '''client.send(OSC.OSCMessage("/hip2", get_hip(channel_data[2])))
-            client.send(OSC.OSCMessage("/lop2", get_lop(channel_data[2])))
-            client.send(OSC.OSCMessage("/volume2", distance_with_deadzone(channel_data[2], channel_data[3])))
-            client.send(OSC.OSCMessage("/pwm2", get_pwm(channel_data[3])))
-
-            client.send(OSC.OSCMessage("/hip3", get_hip(channel_data[4])))
-            client.send(OSC.OSCMessage("/lop3", get_lop(channel_data[4])))
-            client.send(OSC.OSCMessage("/volume3", distance_with_deadzone(channel_data[4], channel_data[5])))
-            client.send(OSC.OSCMessage("/pwm3", get_pwm(channel_data[5])))
-
-            client.send(OSC.OSCMessage("/hip4", get_hip(channel_data[6])))
-            client.send(OSC.OSCMessage("/lop4", get_lop(channel_data[6])))
-            client.send(OSC.OSCMessage("/volume4", distance_with_deadzone(channel_data[6], channel_data[7])))
-            client.send(OSC.OSCMessage("/pwm4", get_pwm(channel_data[7])))'''
-            
-            time.sleep(0.01)
+            time.sleep(0.001)
         except:
             print "Error"
             time.sleep(0.1)
