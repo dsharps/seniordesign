@@ -28,7 +28,7 @@ def spithread():
     i = 0
     while True:
         try:
-            resp = spi.xfer2([i]);
+            resp = spi.xfer2([0]);
             print resp
             time.sleep(0.05)
         except:
