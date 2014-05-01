@@ -98,10 +98,9 @@ def note_active(x, y):
     return (math.sqrt((x-128)**2 + (y-128)**2) > (deadzone * 2))
 
 #three-note polyphony
-active_notes = 0
-pitches = [0, 0, 0, 0, 0, 0]
-midi_notes = [48, 50, 51, 52, 53, 55]
-banned = [51, 5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #What mux is this, why 0 and 52?
+active_notes = []
+channel_to_thumbstick =
+banned = [5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #Mux 5 is floating
 def spithread():
     print "Starting SPI Thread"
     while True:
