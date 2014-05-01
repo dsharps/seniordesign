@@ -129,8 +129,8 @@ except:
 
 
 root = Tk()
-root.geometry("320x240+0+50")
-#root.wm_overrideredirect(True)
+root.geometry("320x240+0+0")
+root.wm_overrideredirect(True)
 app = Example(root)
 
 def update_count():
