@@ -36,8 +36,8 @@ class Example(Frame):
         self.pack(fill=BOTH, expand=1)
 
         self.var = IntVar()
-        self.label = Label(self, text=0, textvariable=self.var)        
-        self.label.place(x=20, y=20)
+        self.label = Label(self, text="None", textvariable=self.var, font=('Helvetica', 30), bg='black', fg='white', anchor='center', width='10', height='2')        
+        self.label.place(x=72, y=84)
 
     def update_counter(self, c):
         self.var.set(c)
@@ -111,10 +111,13 @@ def note_active(x, y):
 def spithread():
     print "Starting SPI Thread"
     global count
+    global keys
     while True:
         try:
             print "Count: %s" % count
             count += 1
+            if count >= len(keys):
+                count = 0
             time.sleep(0.5)
         except:
             print "Error: %s" % repr(sys.exc_info())
@@ -128,13 +131,17 @@ except:
     print "Failed to start spithread"
 
 
+keys = ['C Major' , 'C Minor' , 'C# Major', 'C# Minor', 'D Major' , 'D Minor' , 'D# Major', 'D# Minor', 'E Major' , 'E Minor' , 'F Major', 'F Minor',
+        'F# Major', 'F# Minor', 'G Major' , 'G Minor' , 'G# Major', 'G# Minor', 'A Major' , 'A Minor' , 'A# Major', 'A# Minor', 'B Major', 'B Minor']
+key_index = 0
+
 root = Tk()
 root.geometry("320x240+0+0")
 #root.wm_overrideredirect(True)
 app = Example(root)
 
 def update_count():
-    app.update_counter(count)
+    app.update_counter(keys[count])
     root.after(200, update_count)
 
 root.after(1000, update_count)
