@@ -5,6 +5,8 @@ import os
 import OSC
 import math
 import sys
+from collections import defaultdict
+import random
 
 spi = spidev.SpiDev()
 spi.open(0, 1)
@@ -94,25 +96,68 @@ def get_digital_channels():
 
 #if the x,y position is outside of the deadzone, return true
 def note_active(x, y): 
-    return False
+    #return False
     return (math.sqrt((x-128)**2 + (y-128)**2) > (deadzone * 2))
 
-#three-note polyphony
-active_notes = []
-channel_to_thumbstick =
+
+active_notes = [0, 0, 0, 0, 0, 0]
+channel_to_thumbstick = {0: 35, 1: 40, 2: 49, 3: 53, 4: 8, 6: 28, 7: 23, 8: 35, 9: 40, 10: 49, 11: 53, 12: 8, 14: 28, 15: 23, 16: 34, 17: 41, 18: 54, 19: 52, 20: 9, 22: 29, 23: 22, 24: 33, 25: 41, 26: 54, 27: 52, 28: 9, 30: 29, 31: 22, 32: 34, 33: 42, 34: 55, 35: 51, 36: 10, 38: 30, 39: 21, 40: 33, 41: 42, 42: 55, 43: 51, 44: 10, 46: 30, 47: 21, 48: 32, 49: 43, 50: 56, 51: 50, 52: 11, 54: 31, 55: 20, 56: 32, 57: 43, 58: 56, 59: 50, 60: 11, 62: 31, 63: 20, 64: 27, 65: 19, 66: 44, 67: 36, 68: 4, 70: 3, 71: 12, 72: 27, 73: 19, 74: 44, 75: 36, 76: 4, 78: 3, 79: 12, 80: 26, 81: 18, 82: 45, 83: 37, 84: 5, 86: 0, 87: 13, 88: 26, 89: 18, 90: 45, 91: 37, 92: 5, 94: 0, 95: 13, 96: 25, 97: 17, 98: 46, 99: 38, 100: 6, 102: 1, 103: 14, 104: 25, 105: 17, 106: 46, 107: 38, 108: 6, 110: 1, 111: 14, 112: 24, 113: 16, 114: 47, 115: 39, 116: 7, 118: 2, 119: 15, 120: 24, 121: 16, 122: 47, 123: 39, 124: 7, 126: 2, 127: 15, -2: 48, -1: 48}
+thumbstick_to_midi_pitch = {} #get David's help
+active_thumbsticks = []
+index = 0
+
 banned = [5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #Mux 5 is floating
+
 def spithread():
     print "Starting SPI Thread"
     while True:
         try:
-            channel_data = get_all_channels()
+            #channel_data = get_all_channels()
             #hardcoded for 2 channels of polyphony, for now
             #print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
             #if note_active(channel_data[0], channel_data[1]):
             #    print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
             #print channel_data
-            d = [(e, i) for e, i in enumerate(channel_data) if (i > 140 or i < 110 and e not in banned)]
-            print d
+
+            #filter to just unbanned channels
+            #raw_channels = [(e, i) for e, i in enumerate(channel_data) if e not in banned]
+            channel_data = random.sample(range(0, 5), 4)
+            print "CD: %s" % channel_data
+            print "AT: %s" % active_thumbsticks
+
+            for d in xrange(0, len(channel_data-1, 2)):
+                if len(active_thumbsticks) >= 6: #at max notes, skip the rest
+                    break
+                pitch = thumbstick_to_midi_pitch[channel_to_thumbstick[d]]
+                if note_active(channel_data[d], channel_data[d+1]):
+                    #add at index of first zero, update
+                    if d not in active_thumbsticks:
+                        try:
+                            #get the index of the first zero, set the new pitch there
+                            active_thumbsticks[active_thumbsticks.index(0)] = pitch
+                        except:
+                            #do nothing, try again next time
+                            print "Error: %s" % sys.exc_info()
+                            pass
+                    #update
+                    client.send(OSC.OSCMessage("/n%s"%d, [pitch, ((channel_data[d]/255.0)*10), ((channel_data[d+1]/255.0)*100),
+                                           (distance_with_deadzone(channel_data[d], channel_data[d+1])/255.0)*100]))
+                #note not active, but still in active_thumbsticks
+                elif channel_to_thumbstick[d] in active_thumbsticks:
+                    #delete this thumbstick
+                    active_thumbsticks.remove(pitch)
+            print "CD: %s" % channel_data
+            print "AT: %s" % active_thumbsticks
+            print "-------"
+
+
+
+            # for t in raw_channels:
+            #     if t[1] > 140 or t[1] < 116: #not deadzoned
+            #         active_thumbsticks[channel_to_thumbstick[t[0]]] = 
+
+
+            # print d
             '''print "%s, %s, %s, %s, %s, %s, %s, %s" % (bin(channel_data[0]),
                                                       bin(channel_data[1]),
                                                       bin(channel_data[2]),
@@ -214,7 +259,7 @@ def spithread():
                     pitches[5] = 0
                     client.send(OSC.OSCMessage("/n6", [55, 0, 0, 0]))
             '''
-            time.sleep(0.005)
+            time.sleep(2)
         except:
             print "Error: %s" % repr(sys.exc_info())
             time.sleep(0.1)
