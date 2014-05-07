@@ -398,7 +398,6 @@
 #X obj 1502 -190 unpack f f f f;
 #X obj 247 -217 OSC/routeOSC /n1 /n2 /n3 /n4 /n5 /n6;
 #X obj 23 632 loadbang;
-#X msg 23 683 \; pd dsp \$1 \;;
 #X obj 23 658 delay 100;
 #X obj 100 683 s init;
 #X obj 122 500 r init;
@@ -406,6 +405,10 @@
 #X msg 373 -145 64;
 #X msg 660 -147 67;
 #X obj 411 497 r init;
+#X msg 23 683 \; pd dsp 1 \;;
+#X obj 534 655 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 534 675 s init;
 #X connect 1 0 2 0;
 #X connect 2 0 7 1;
 #X connect 3 0 4 0;
@@ -501,7 +504,7 @@
 #X connect 86 0 88 0;
 #X connect 87 0 90 0;
 #X connect 88 0 76 0;
-#X connect 89 0 385 0;
+#X connect 89 0 384 0;
 #X connect 90 0 79 0;
 #X connect 91 0 75 1;
 #X connect 92 0 75 1;
@@ -565,7 +568,7 @@
 #X connect 144 0 146 0;
 #X connect 145 0 148 0;
 #X connect 146 0 134 0;
-#X connect 147 0 386 0;
+#X connect 147 0 385 0;
 #X connect 148 0 137 0;
 #X connect 149 0 133 1;
 #X connect 150 0 133 1;
@@ -837,11 +840,12 @@
 #X connect 378 3 255 0;
 #X connect 378 4 316 0;
 #X connect 378 5 377 0;
-#X connect 379 0 381 0;
-#X connect 381 0 380 0;
-#X connect 381 0 382 0;
-#X connect 383 0 13 0;
-#X connect 384 0 130 0;
-#X connect 385 0 69 0;
-#X connect 386 0 127 0;
-#X connect 387 0 72 0;
+#X connect 379 0 380 0;
+#X connect 380 0 387 0;
+#X connect 380 0 381 0;
+#X connect 382 0 13 0;
+#X connect 383 0 130 0;
+#X connect 384 0 69 0;
+#X connect 385 0 127 0;
+#X connect 386 0 72 0;
+#X connect 388 0 389 0;
