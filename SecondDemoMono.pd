@@ -1,10 +1,10 @@
-#N canvas 31 68 1881 984 10;
+#N canvas 638 22 523 958 10;
 #X obj 278 694 dac~;
 #X floatatom 190 670 5 0 100 1 Volume - -;
 #X obj 190 693 / 100;
-#X obj 476 653 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+#X obj 125 635 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 476 673 s init;
+#X obj 125 655 s init;
 #X obj 189 638 r init;
 #X msg 234 638 50;
 #X obj 279 639 *~;
@@ -13,7 +13,7 @@
 #X floatatom 32 -109 5 0 0 0 - - -;
 #X obj 31 464 *~ 0.7;
 #X obj 31 499 *~;
-#X obj 59 500 tgl 15 0 empty empty On/Off 17 7 0 10 -262144 -1 -1 0
+#X obj 59 500 tgl 15 0 empty empty On/Off 17 7 0 10 -262144 -1 -1 1
 1;
 #X obj 32 -82 mtof;
 #X floatatom 209 11 8 0 0 1 Pitch - -;
@@ -79,6 +79,11 @@
 #X floatatom 214 -83 5 0 0 0 - - -;
 #X floatatom 239 -61 5 0 0 0 - - -;
 #X obj 247 -217 OSC/routeOSC /n1 /n2 /n3 /n4 /n5 /n6;
+#X obj 23 632 loadbang;
+#X msg 23 683 \; pd dsp \$1 \;;
+#X obj 23 658 delay 100;
+#X obj 100 683 s init;
+#X obj 116 500 r init;
 #X connect 1 0 2 0;
 #X connect 2 0 7 1;
 #X connect 3 0 4 0;
@@ -162,3 +167,7 @@
 #X connect 69 3 17 0;
 #X connect 69 3 74 0;
 #X connect 75 0 69 0;
+#X connect 76 0 78 0;
+#X connect 78 0 77 0;
+#X connect 78 0 79 0;
+#X connect 80 0 13 0;
