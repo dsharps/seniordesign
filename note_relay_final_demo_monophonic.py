@@ -9,7 +9,7 @@ from collections import defaultdict
 import random
 
 spi = spidev.SpiDev()
-spi.open(0, 1)
+spi.open(0, 0)
 exit = 0
 
 client = OSC.OSCClient()
@@ -75,9 +75,9 @@ def get_all_channels():
     return [val for sublist in results[1:] for val in sublist]
 
 def get_ordered_channels():
-    resp = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,122,114,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50, 0]
-    results = [0] * 115
-    for i in xrange(0, 115):
+    resp = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,122,114,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50,5, 0]
+    results = [0] * 116
+    for i in xrange(0, 116):
         try:
             results[i] = spi.xfer2([resp[i]])
         except:
@@ -98,6 +98,16 @@ def get_digital_channels():
     resp = [128, 129, 130, 131, 132, 133, 134, 135, 0]
     results = [0] * 9
     for i in xrange(0, 9):
+        try:
+            results[i] = spi.xfer2([resp[i]])
+        except:
+            print "%s: %s" % (i, sys.exc_info())
+    return [val for sublist in results[1:] for val in sublist]
+
+def get_banned_channels():
+    resp = [0, 51, 5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125]
+    results = [0] * 18
+    for i in xrange(0, 18):
         try:
             results[i] = spi.xfer2([resp[i]])
         except:
@@ -128,7 +138,7 @@ slots = [0, 0, 0, 0, 0, 0]  #mapping of notes to slots
 queue = []                  #chronological store of notes - max length should be 6!
 
 
-banned = [51, 5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #Mux 5 is floating
+banned = [0, 51, 5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #Mux 5 is floating
 
 ordered = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,122,114,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50]
 
@@ -139,25 +149,32 @@ def spithread():
             channel_data = get_ordered_channels()
             #if note_active(channel_data[0], channel_data[1]):
             #    print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
-            #print channel_data
+            #print channel_data[2]
             
             #print "CD: %s" % channel_data
             #print "AT: %s" % active_thumbsticks
             no_notes = True
+            #print ((channel_data[len(channel_data)-1]-90)/7.0)*64
+            bend = ((channel_data[len(channel_data)-1]-90)/7.0)*64
+	    if 26 <= bend <= 38:
+		client.send(OSC.OSCMessage("/bend", [0]))
+	    else:
+	        client.send(OSC.OSCMessage("/bend", [((channel_data[len(channel_data)-1]-90)/7.0)*64]))
             
-            for d in xrange(0, len(ordered)-1, 2):
+            for d in xrange(2, len(ordered)-1, 2):
                 if ordered[d] not in [100, 101] and ordered[d] not in banned:
                    # print "d:%s, t:%s" % (d, channel_to_thumbstick[ordered[d]])
                     pitch = thumbstick_to_midi_pitch[channel_to_thumbstick[ordered[d]]]
                     #pitch = 0
                     if note_active(channel_data[d], channel_data[d+1]):
-                       # print "c:%s, t:%s, t2: %s, [%s, %s], p:%s" % (d, channel_to_thumbstick[ordered[d]], channel_to_thumbstick[ordered[d+1]], channel_data[d], channel_data[d+1], pitch)
-                        client.send(OSC.OSCMessage("/n1", [pitch, ((channel_data[ordered[d]]/255.0)*10), ((channel_data[ordered[d+1]]/255.0)*100),(distance_with_deadzone(channel_data[d], channel_data[d+1])/255.0)*100]))
+                        #print "c:%s, t:%s, t2: %s, [%s, %s], p:%s" % (d, channel_to_thumbstick[ordered[d]], channel_to_thumbstick[ordered[d+1]], channel_data[d], channel_data[d+1], pitch)
+                        client.send(OSC.OSCMessage("/n1", [pitch, ((channel_data[d]/255.0)*10), ((channel_data[d+1]/255.0)*100),(distance_with_deadzone(channel_data[d], channel_data[d+1])/255.0)*100]))
                         no_notes = False
                         break
 
             if no_notes:
                 client.send(OSC.OSCMessage("/n1", [0, 0, 0, 0]))
+            
             time.sleep(0.001)
         except:
             print "Error!!!: %s" % repr(sys.exc_info())

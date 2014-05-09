@@ -1,4 +1,4 @@
-#N canvas 0 22 1680 984 10;
+#N canvas 15 61 1680 984 10;
 #X obj 278 694 dac~;
 #X floatatom 190 670 5 0 100 1 Volume - -;
 #X obj 190 693 / 100;
@@ -13,7 +13,7 @@
 #X floatatom 32 -29 5 0 0 0 - - -;
 #X obj 31 544 *~ 0.7;
 #X obj 31 579 *~;
-#X obj 59 580 tgl 15 0 empty empty On/Off 17 7 0 10 -262144 -1 -1 0
+#X obj 59 580 tgl 15 0 empty empty On/Off 17 7 0 10 -262144 -1 -1 1
 1;
 #X obj 32 -2 mtof;
 #X floatatom 209 91 8 0 0 1 Pitch - -;
@@ -76,7 +76,7 @@
 #X obj 327 542 *~ 0.7;
 #X obj 327 577 *~;
 #X obj 355 578 tgl 15 0 empty empty On/Off 17 7 0 10 -262144 -1 -1
-0 1;
+1 1;
 #X obj 328 -4 mtof;
 #X floatatom 505 89 8 0 0 1 Pitch - -;
 #X obj 474 89 * -1;
@@ -137,7 +137,7 @@
 #X obj 614 540 *~ 0.7;
 #X obj 614 575 *~;
 #X obj 642 576 tgl 15 0 empty empty On/Off 17 7 0 10 -262144 -1 -1
-0 1;
+1 1;
 #X obj 615 -6 mtof;
 #X floatatom 792 87 8 0 0 1 Pitch - -;
 #X obj 761 87 * -1;
@@ -443,13 +443,13 @@
 #X obj 686 -244 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
 #X msg 879 -244 0;
-#X obj 247 -217 OSC/routeOSC /n1 /n2 /n3 /n4 /n5 /n6;
 #X obj 733 -228 / 62;
 #X msg 791 -244 -124;
-#X msg 831 -244 62;
 #X msg 919 -244 62;
 #X msg 959 -244 124;
 #X obj 879 -222 r init;
+#X obj 250 -217 OSC/routeOSC /n1 /n2 /n3 /n4 /n5 /n6 /bend;
+#X msg 831 -244 -62;
 #X connect 1 0 2 0;
 #X connect 2 0 7 1;
 #X connect 3 0 4 0;
@@ -457,7 +457,7 @@
 #X connect 6 0 1 0;
 #X connect 7 0 0 0;
 #X connect 7 0 0 1;
-#X connect 8 0 423 0;
+#X connect 8 0 428 0;
 #X connect 9 0 8 0;
 #X connect 10 0 14 0;
 #X connect 10 0 421 0;
@@ -880,7 +880,7 @@
 #X connect 380 0 127 0;
 #X connect 381 0 72 0;
 #X connect 383 0 384 0;
-#X connect 386 0 424 0;
+#X connect 386 0 423 0;
 #X connect 387 0 394 0;
 #X connect 387 0 399 0;
 #X connect 387 0 404 0;
@@ -946,15 +946,16 @@
 #X connect 420 0 416 1;
 #X connect 421 0 386 0;
 #X connect 422 0 386 0;
-#X connect 423 0 185 0;
-#X connect 423 1 189 0;
-#X connect 423 2 190 0;
-#X connect 423 3 251 0;
-#X connect 423 4 312 0;
-#X connect 423 5 373 0;
-#X connect 424 0 388 0;
+#X connect 423 0 388 0;
+#X connect 424 0 386 0;
 #X connect 425 0 386 0;
 #X connect 426 0 386 0;
-#X connect 427 0 386 0;
-#X connect 428 0 386 0;
-#X connect 429 0 422 0;
+#X connect 427 0 422 0;
+#X connect 428 0 185 0;
+#X connect 428 1 189 0;
+#X connect 428 2 190 0;
+#X connect 428 3 251 0;
+#X connect 428 4 312 0;
+#X connect 428 5 373 0;
+#X connect 428 6 386 0;
+#X connect 429 0 386 0;
