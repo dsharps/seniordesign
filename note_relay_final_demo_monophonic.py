@@ -160,6 +160,34 @@ def spithread():
 		client.send(OSC.OSCMessage("/bend", [0]))
 	    else:
 	        client.send(OSC.OSCMessage("/bend", [((channel_data[len(channel_data)-1]-90)/7.0)*64]))
+
+            active_notes = [(thumbstick_to_midi_pitch[channel_to_thumbstick[d]], channel_data[d], channel_data[d+1]) for d in xrange(0, len(ordered)-1, 2) if note_active(channel_data[d], channel_data[d+1])]
+            #check if a previously playing note turned off, and deactivate if so
+            active_pitches = [t[0] for t in active_notes]
+            for i, note in enumerate(slots):
+                if note not in active_pitches:
+                    client.send(OSC.OSCMessage("/n%s"%str(i), [0, 0, 0, 0])) #shutoff signal
+                    slots[i] = 0 #clear slot
+                    queue.remove(note) #remove from queue
+                    pass
+
+            #loop through active notes, add if necessary, then update
+            for note in active_notes:
+                if note[0] not in slots:
+                    #add if there's a free slot, o.w. kick out oldest note and add
+                    try:
+                        i = slots.index(0)
+                        slots[i] = note[0]
+                        queue.insert(0, note[0])
+                    except:
+                        #catch not found exception
+                        slots[slots.index(queue.pop())] = note[0]
+                        queue.insert(0, note[0])
+                    #add to queue also
+                    pass
+                #update, send note[1] and note[2]
+                pass
+            
             
             for d in xrange(2, len(ordered)-1, 2):
                 if ordered[d] not in [100, 101] and ordered[d] not in banned:
