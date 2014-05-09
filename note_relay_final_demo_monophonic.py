@@ -164,13 +164,14 @@ def spithread():
             active_notes = [(thumbstick_to_midi_pitch[channel_to_thumbstick[d]], channel_data[d], channel_data[d+1]) for d in xrange(0, len(ordered)-1, 2) if note_active(channel_data[d], channel_data[d+1])]
             #check if a previously playing note turned off, and deactivate if so
             active_pitches = [t[0] for t in active_notes]
+            print "Actives: %s" % active_pitches
+            print "Slots: %s" % slots
             for i, note in enumerate(slots):
                 if note not in active_pitches:
                     client.send(OSC.OSCMessage("/n%s"%str(i), [0, 0, 0, 0])) #shutoff signal
                     slots[i] = 0 #clear slot
-                    queue.remove(note) #remove from queue
-                    pass
-
+                    #queue.remove(note) #remove from queue
+            print "After removing dead notes: %s" % slots
             #loop through active notes, add if necessary, then update
             for note in active_notes:
                 if note[0] not in slots:
@@ -178,17 +179,16 @@ def spithread():
                     try:
                         i = slots.index(0)
                         slots[i] = note[0]
-                        queue.insert(0, note[0])
+                        #queue.insert(0, note[0])
                     except:
                         #catch not found exception
                         slots[slots.index(queue.pop())] = note[0]
-                        queue.insert(0, note[0])
-                    #add to queue also
-                    pass
-                #update, send note[1] and note[2]
-                pass
-            
-            
+                        #queue.insert(0, note[0])
+                    #update
+                client.send(OSC.OSCMessage("/n%s"%(slots.index(note[0])), [note[0], ((note[1]/255.0)*10), ((note[2]/255.0)*100),(distance_with_deadzone(note[1], note[2])/255.0)*100]))
+            print "After added new notes: %s" % slots
+            print "----------------------------------"
+            '''
             for d in xrange(2, len(ordered)-1, 2):
                 if ordered[d] not in [100, 101] and ordered[d] not in banned:
                    # print "d:%s, t:%s" % (d, channel_to_thumbstick[ordered[d]])
@@ -202,8 +202,8 @@ def spithread():
 
             if no_notes:
                 client.send(OSC.OSCMessage("/n1", [0, 0, 0, 0]))
-            
-            time.sleep(0.001)
+            '''
+            time.sleep(3)
         except:
             print "Error!!!: %s" % repr(sys.exc_info())
             time.sleep(0.1)
