@@ -1,5 +1,6 @@
 import spidev
 import thread
+import traceback
 import time
 import os
 import OSC
@@ -75,7 +76,7 @@ def get_all_channels():
     return [val for sublist in results[1:] for val in sublist]
 
 def get_ordered_channels():
-    resp = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,122,114,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50,5, 0]
+    resp = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,77,85,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50,5, 0]
     results = [0] * 116
     for i in xrange(0, 116):
         try:
@@ -126,7 +127,7 @@ channel_to_thumbstick = {0: 35,  1: 40,  2: 49,  3: 53,  4: 8,   6: 28,  7: 23, 
                         64: 27, 65: 19, 66: 44, 67: 36, 68: 4,  70: 3,  71: 12, 72: 27, 73: 19, 74: 44, 75: 36, 76: 4,  78: 3,  79: 12, 
                         80: 26, 81: 18, 82: 45, 83: 37, 84: 5,  86: 0,  87: 13, 88: 26, 89: 18, 90: 45, 91: 37, 92: 5,  94: 0,  95: 13, 
                         96: 25, 97: 17, 98: 46, 99: 38,100: 6, 102: 1, 103: 14,104: 25,105: 17,106: 46,107: 38,108: 6, 110: 1, 111: 14, 
-                       112: 24,113: 16,114: 47,115: 39,116: 7, 118: 2, 119: 15,120: 24,121: 16,122: 47,123: 39,124: 7, 126: 2, 127: 15, 114: 48, 122: 48}
+                       112: 24,113: 16,114: 47,115: 39,116: 7, 118: 2, 119: 15,120: 24,121: 16,122: 47,123: 39,124: 7, 126: 2, 127: 15, 77: 48, 85: 48}
 
 thumbstick_to_midi_pitch = {0: 37, 1: 42, 2: 47, 3: 39, 4: 44, 5: 49, 6: 54, 7: 59, 8: 36, 9: 41, 10: 46, 11: 51, 12: 56, 13: 61, 14: 66,
                             15: 71, 16: 38, 17: 43, 18: 48, 19: 53, 20: 58, 21: 63, 22: 68, 23: 73, 24: 35, 25: 40, 26: 45, 27: 50, 28: 55,
@@ -138,9 +139,9 @@ slots = [0, 0, 0, 0, 0, 0]  #mapping of notes to slots
 queue = []                  #chronological store of notes - max length should be 6!
 
 
-banned = [0, 51, 5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #Mux 5 is floating
+banned = [51, 13, 21, 29, 37, 45, 53, 61, 69, 93, 101, 109, 117, 125] #Mux 5 is floating, 5 is pitch bend, 77 is T48 X and 85 is T48 Y
 
-ordered = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,122,114,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50]
+ordered = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,77,85,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50]
 
 def spithread():
     print "Starting SPI Thread"
@@ -149,10 +150,11 @@ def spithread():
             channel_data = get_ordered_channels()
             #if note_active(channel_data[0], channel_data[1]):
             #    print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
-            #print channel_data[2]
+            #print channel_data
             
             #print "CD: %s" % channel_data
             #print "AT: %s" % active_thumbsticks
+
             no_notes = True
             #print ((channel_data[len(channel_data)-1]-90)/7.0)*64
             bend = ((channel_data[len(channel_data)-1]-90)/7.0)*64
@@ -160,18 +162,22 @@ def spithread():
 		client.send(OSC.OSCMessage("/bend", [0]))
 	    else:
 	        client.send(OSC.OSCMessage("/bend", [((channel_data[len(channel_data)-1]-90)/7.0)*64]))
+            
+            active_notes = [(thumbstick_to_midi_pitch[channel_to_thumbstick[ordered[d]]], channel_to_thumbstick[ordered[d]], channel_data[d], channel_data[d+1], ordered[d], ordered[d+1], d, d+1) for d in xrange(0, len(ordered)-1, 2) if note_active(channel_data[d], channel_data[d+1])]
 
-            active_notes = [(thumbstick_to_midi_pitch[channel_to_thumbstick[d]], channel_data[d], channel_data[d+1]) for d in xrange(0, len(ordered)-1, 2) if note_active(channel_data[d], channel_data[d+1])]
             #check if a previously playing note turned off, and deactivate if so
             active_pitches = [t[0] for t in active_notes]
-            print "Actives: %s" % active_pitches
-            print "Slots: %s" % slots
+            #print "Actives: %s" % active_pitches
+            #for a in active_notes:
+            #    print a
+            #print "Slots: %s" % slots
             for i, note in enumerate(slots):
-                if note not in active_pitches:
-                    client.send(OSC.OSCMessage("/n%s"%str(i), [0, 0, 0, 0])) #shutoff signal
+                if note not in active_pitches and note != 0:
+                    #print "Shutting off note %s" % note
+                    client.send(OSC.OSCMessage("/n%s"%str(i+1), [0, 0, 0, 0])) #shutoff signal
                     slots[i] = 0 #clear slot
                     #queue.remove(note) #remove from queue
-            print "After removing dead notes: %s" % slots
+            #print "After removing dead notes: %s" % slots
             #loop through active notes, add if necessary, then update
             for note in active_notes:
                 if note[0] not in slots:
@@ -181,13 +187,15 @@ def spithread():
                         slots[i] = note[0]
                         #queue.insert(0, note[0])
                     except:
+                        pass
                         #catch not found exception
-                        slots[slots.index(queue.pop())] = note[0]
+                        #slots[slots.index(queue.pop())] = note[0]
                         #queue.insert(0, note[0])
                     #update
-                client.send(OSC.OSCMessage("/n%s"%(slots.index(note[0])), [note[0], ((note[1]/255.0)*10), ((note[2]/255.0)*100),(distance_with_deadzone(note[1], note[2])/255.0)*100]))
-            print "After added new notes: %s" % slots
-            print "----------------------------------"
+                client.send(OSC.OSCMessage("/n%s"%(slots.index(note[0])+1), [note[0], ((note[1]/255.0)*10), ((note[2]/255.0)*100),(distance_with_deadzone(note[1], note[2])/255.0)*100]))
+            #print "After added new notes: %s" % slots
+            #print "----------------------------------"
+            
             '''
             for d in xrange(2, len(ordered)-1, 2):
                 if ordered[d] not in [100, 101] and ordered[d] not in banned:
@@ -203,9 +211,10 @@ def spithread():
             if no_notes:
                 client.send(OSC.OSCMessage("/n1", [0, 0, 0, 0]))
             '''
-            time.sleep(3)
+            time.sleep(0.001)
         except:
-            print "Error!!!: %s" % repr(sys.exc_info())
+            print "Error!!!"
+            print traceback.format_exc()
             time.sleep(0.1)
         if exit:
             thread.exit()
