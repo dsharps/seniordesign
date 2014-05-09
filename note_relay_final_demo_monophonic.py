@@ -124,8 +124,8 @@ thumbstick_to_midi_pitch = {0: 37, 1: 42, 2: 47, 3: 39, 4: 44, 5: 49, 6: 54, 7: 
                             43: 49, 44: 54, 45: 59, 46: 64, 47: 69, 48: 46, 49: 51, 50: 56, 51: 61, 52: 66, 53: 71, 54: 58, 55: 63, 56: 68, 57: 70}
 index = 0
 
-slots = [0, 0, 0, 0, 0, 0] #mapping of notes to slots
-queue = [0, 0, 0, 0, 0, 0] #chronological store of notes
+slots = [0, 0, 0, 0, 0, 0]  #mapping of notes to slots
+queue = []                  #chronological store of notes - max length should be 6!
 
 
 banned = [51, 5, 13, 21, 29, 37, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125] #Mux 5 is floating
