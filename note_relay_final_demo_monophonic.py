@@ -22,7 +22,7 @@ except:
     print "not connected"
     pass
 
-deadzone = 10
+deadzone = 9
 
 def distance_with_deadzone(x, y):
     d = math.sqrt((x-128)**2 + (y-128)**2)
@@ -76,9 +76,19 @@ def get_all_channels():
     return [val for sublist in results[1:] for val in sublist]
 
 def get_ordered_channels():
-    resp = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,77,85,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50,5, 0]
-    results = [0] * 116
-    for i in xrange(0, 116):
+    resp = [94,86,110,102,126,118,78,70,76,68,92,84,108,100,124,116,4,12,20,28,36,44,52,60,79,71,95,87,111,103,127,119,121,113,105,97,89,81,73,65,55,63,39,47,23,31,7,15,120,112,104,96,88,80,72,64,14,6,30,22,46,38,62,54,56,48,40,24,32,16,8,0,75,67,91,83,107,99,123,115,1,9,17,25,33,41,49,57,74,66,90,82,106,98,122,114,77,85,10,2,51,59,35,43,19,27,3,11,26,18,42,34,58,50, 0]
+    results = [0] * 115
+    for i in xrange(0, 115):
+        try:
+            results[i] = spi.xfer2([resp[i]])
+        except:
+            print sys.exc_info()
+    return [val for sublist in results[1:] for val in sublist]
+
+def get_bend():
+    resp = [29, 0]
+    results = [0] * 2
+    for i in xrange(0, 2):
         try:
             results[i] = spi.xfer2([resp[i]])
         except:
@@ -148,25 +158,30 @@ def spithread():
     while True:
         try:
             channel_data = get_ordered_channels()
+            #print [_ for _ in enumerate(channel_data)]
+            #print [channel_data[5], channel_data[77], channel_data[85]]
             #if note_active(channel_data[0], channel_data[1]):
             #    print "X: %s, Y: %s" % (channel_data[0], channel_data[1])
             #print channel_data
             
             #print "CD: %s" % channel_data
             #print "AT: %s" % active_thumbsticks
-
+            
             no_notes = True
             #print ((channel_data[len(channel_data)-1]-90)/7.0)*64
-            bend = ((channel_data[len(channel_data)-1]-90)/7.0)*64
-	    if 26 <= bend <= 38:
+            bend_channel = get_bend()
+            bend = ((bend_channel[0]-120)/46.5)*64
+	    if 78 <= bend_channel[0] <= 97:
 		client.send(OSC.OSCMessage("/bend", [0]))
 	    else:
-	        client.send(OSC.OSCMessage("/bend", [((channel_data[len(channel_data)-1]-90)/7.0)*64]))
+	        client.send(OSC.OSCMessage("/bend", [bend]))
             
-            active_notes = [(thumbstick_to_midi_pitch[channel_to_thumbstick[ordered[d]]], channel_to_thumbstick[ordered[d]], channel_data[d], channel_data[d+1], ordered[d], ordered[d+1], d, d+1) for d in xrange(0, len(ordered)-1, 2) if note_active(channel_data[d], channel_data[d+1])]
+            active_notes = [(thumbstick_to_midi_pitch[channel_to_thumbstick[ordered[d]]], channel_data[d], channel_data[d+1], d, d+1) for d in xrange(0, len(ordered)-1, 2) if note_active(channel_data[d], channel_data[d+1])]
 
             #check if a previously playing note turned off, and deactivate if so
             active_pitches = [t[0] for t in active_notes]
+            
+            #print active_notes
             #print "Actives: %s" % active_pitches
             #for a in active_notes:
             #    print a
