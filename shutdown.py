@@ -14,9 +14,8 @@ import os
 # the same as the pin numbers on the gpio headers
 GPIO.setmode(GPIO.BCM)  
 
-# Pin 31 (Header 5) will be input and will have his pull up resistor activated
-# so we only need to connect a button to ground
-GPIO.setup(31, GPIO.IN, pull_up_down = GPIO.PUD_UP)  
+# Pin 17 (Main Header) will be input and has no pull up or pull down resistor
+GPIO.setup(17, GPIO.IN, pull_up_down = GPIO.PUD_OFF)  
 
 # ISR: if our button is pressed, we will have a falling edge on pin 31
 # this will trigger this interrupt:
@@ -26,7 +25,7 @@ def Int_shutdown(channel):
    
 # Now we are programming pin 31 as an interrupt input
 # it will react on a falling edge and call our interrupt routine "Int_shutdown"
-GPIO.add_event_detect(31, GPIO.FALLING, callback = Int_shutdown, bouncetime = 2000)   
+GPIO.add_event_detect(31, GPIO.RISING, callback = Int_shutdown, bouncetime = 2000)   
 
 # do nothing while waiting for button to be pressed
 while 1:
