@@ -162,6 +162,7 @@ def spithread():
                     try:
                         i = slots.index(0)
                         slots[i] = note[0]
+                        queue.insert(0, note[0])
                     except:
                         #catch not found exception
                         slots[slots.index(queue.pop())] = note[0]
